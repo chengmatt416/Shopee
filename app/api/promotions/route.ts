@@ -6,104 +6,98 @@ import { validateAdminRequest, getUnauthorizedResponse } from "@/lib/auth";
 
 const dataPath = path.join(process.cwd(), "data", "promotions.json");
 
-export async function GET() {
-  try {
-    const data = await fs.readFile(dataPath, "utf-8");
-    const promotions: Promotion[] = JSON.parse(data);
-    return NextResponse.json(promotions);
-  } catch (error) {
-    return NextResponse.json([], { status: 200 });
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const action = searchParams.get("action");
+  
+  // List all promotions (public)
+  if (!action || action === "list") {
+    try {
+      const data = await fs.readFile(dataPath, "utf-8");
+      const promotions: Promotion[] = JSON.parse(data);
+      return NextResponse.json(promotions);
+    } catch (error) {
+      return NextResponse.json([], { status: 200 });
+    }
   }
-}
-
-export async function POST(request: NextRequest) {
+  
+  // Admin actions require authentication
   if (!validateAdminRequest(request)) {
     return getUnauthorizedResponse();
   }
   
   try {
-    const body = await request.json();
     const data = await fs.readFile(dataPath, "utf-8");
     const promotions: Promotion[] = JSON.parse(data);
     
-    const newPromotion: Promotion = {
-      id: Date.now().toString(),
-      productId: body.productId,
-      minQuantity: body.minQuantity,
-      discountedPrice: body.discountedPrice,
-      description: body.description,
-    };
-    
-    promotions.push(newPromotion);
-    await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
-    
-    return NextResponse.json(newPromotion);
-  } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to create promotion" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  if (!validateAdminRequest(request)) {
-    return getUnauthorizedResponse();
-  }
-  
-  try {
-    const body = await request.json();
-    const data = await fs.readFile(dataPath, "utf-8");
-    const promotions: Promotion[] = JSON.parse(data);
-    
-    const index = promotions.findIndex((p) => p.id === body.id);
-    if (index === -1) {
-      return NextResponse.json(
-        { error: "Promotion not found" },
-        { status: 404 }
-      );
+    // Create new promotion
+    if (action === "create") {
+      const productId = searchParams.get("productId");
+      const minQuantity = searchParams.get("minQuantity");
+      const discountedPrice = searchParams.get("discountedPrice");
+      const description = searchParams.get("description");
+      
+      const newPromotion: Promotion = {
+        id: Date.now().toString(),
+        productId: productId || "",
+        minQuantity: minQuantity ? parseInt(minQuantity) : 0,
+        discountedPrice: discountedPrice ? parseFloat(discountedPrice) : 0,
+        description: description || "",
+      };
+      
+      promotions.push(newPromotion);
+      await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
+      
+      return NextResponse.json(newPromotion);
     }
     
-    // Explicitly map only allowed fields to prevent property injection
-    const updatedPromotion: Promotion = {
-      id: promotions[index].id, // Keep existing ID
-      productId: body.productId ?? promotions[index].productId,
-      minQuantity: body.minQuantity ?? promotions[index].minQuantity,
-      discountedPrice: body.discountedPrice ?? promotions[index].discountedPrice,
-      description: body.description ?? promotions[index].description,
-    };
+    // Update existing promotion
+    if (action === "update") {
+      const id = searchParams.get("id");
+      const productId = searchParams.get("productId");
+      const minQuantity = searchParams.get("minQuantity");
+      const discountedPrice = searchParams.get("discountedPrice");
+      const description = searchParams.get("description");
+      
+      const index = promotions.findIndex((p) => p.id === id);
+      if (index === -1) {
+        return NextResponse.json(
+          { error: "Promotion not found" },
+          { status: 404 }
+        );
+      }
+      
+      // Explicitly map only allowed fields to prevent property injection
+      const updatedPromotion: Promotion = {
+        id: promotions[index].id, // Keep existing ID
+        productId: productId || promotions[index].productId,
+        minQuantity: minQuantity ? parseInt(minQuantity) : promotions[index].minQuantity,
+        discountedPrice: discountedPrice ? parseFloat(discountedPrice) : promotions[index].discountedPrice,
+        description: description || promotions[index].description,
+      };
+      
+      promotions[index] = updatedPromotion;
+      await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
+      
+      return NextResponse.json(promotions[index]);
+    }
     
-    promotions[index] = updatedPromotion;
-    await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
+    // Delete promotion
+    if (action === "delete") {
+      const id = searchParams.get("id");
+      const filtered = promotions.filter((p) => p.id !== id);
+      await fs.writeFile(dataPath, JSON.stringify(filtered, null, 2));
+      
+      return NextResponse.json({ success: true });
+    }
     
-    return NextResponse.json(promotions[index]);
-  } catch (error) {
     return NextResponse.json(
-      { error: "Failed to update promotion" },
-      { status: 500 }
+      { error: "Invalid action" },
+      { status: 400 }
     );
-  }
-}
-
-export async function DELETE(request: NextRequest) {
-  if (!validateAdminRequest(request)) {
-    return getUnauthorizedResponse();
-  }
-  
-  try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
-    
-    const data = await fs.readFile(dataPath, "utf-8");
-    const promotions: Promotion[] = JSON.parse(data);
-    
-    const filtered = promotions.filter((p) => p.id !== id);
-    await fs.writeFile(dataPath, JSON.stringify(filtered, null, 2));
-    
-    return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete promotion" },
+      { error: "Failed to process request" },
       { status: 500 }
     );
   }
