@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { Promotion } from "@/types";
+import { validateAdminRequest, getUnauthorizedResponse } from "@/lib/auth";
 
 const dataPath = path.join(process.cwd(), "data", "promotions.json");
 
@@ -16,6 +17,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
   try {
     const body = await request.json();
     const data = await fs.readFile(dataPath, "utf-8");
@@ -41,7 +46,41 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
+  try {
+    const body = await request.json();
+    const data = await fs.readFile(dataPath, "utf-8");
+    const promotions: Promotion[] = JSON.parse(data);
+    
+    const index = promotions.findIndex((p) => p.id === body.id);
+    if (index === -1) {
+      return NextResponse.json(
+        { error: "Promotion not found" },
+        { status: 404 }
+      );
+    }
+    
+    promotions[index] = { ...promotions[index], ...body };
+    await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
+    
+    return NextResponse.json(promotions[index]);
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to update promotion" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
