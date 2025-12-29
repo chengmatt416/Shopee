@@ -65,7 +65,17 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    products[index] = { ...products[index], ...body };
+    // Explicitly map only allowed fields to prevent property injection
+    const updatedProduct: Product = {
+      id: products[index].id, // Keep existing ID
+      name: body.name ?? products[index].name,
+      description: body.description ?? products[index].description,
+      price: body.price ?? products[index].price,
+      image: body.image ?? products[index].image,
+      stock: body.stock ?? products[index].stock,
+    };
+    
+    products[index] = updatedProduct;
     await fs.writeFile(dataPath, JSON.stringify(products, null, 2));
     
     return NextResponse.json(products[index]);

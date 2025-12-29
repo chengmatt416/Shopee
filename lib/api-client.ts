@@ -1,9 +1,14 @@
 // Client-side API key helper
-// In production, this should be stored securely (e.g., in session storage after login)
+// IMPORTANT: In production, this should be stored securely (e.g., in session storage after login)
+// The default key is only for development/demo purposes
 export function getApiKey(): string {
-  // For development, we use a hardcoded key
-  // In production, this would come from authentication
-  return process.env.NEXT_PUBLIC_ADMIN_API_KEY || "shopee-admin-2024";
+  const apiKey = process.env.NEXT_PUBLIC_ADMIN_API_KEY || "shopee-admin-2024";
+  
+  if (!process.env.NEXT_PUBLIC_ADMIN_API_KEY && typeof window !== "undefined") {
+    console.warn("WARNING: Using default API key. Please set NEXT_PUBLIC_ADMIN_API_KEY environment variable.");
+  }
+  
+  return apiKey;
 }
 
 export function getAuthHeaders(): HeadersInit {

@@ -6,9 +6,10 @@
 
 ### 後台管理
 - 📦 **商品管理**: 新增、編輯、刪除商品（名稱、相片、價格）
-- 🎉 **促銷活動**: 設定批量優惠（達到特定數量享特價）
+- 🎉 **促銷活動**: 新增、編輯、刪除批量優惠（達到特定數量享特價）
 - 📊 **銷售報表**: 查看訂單明細並下載報表
 - 📄 **合約下載**: 下載購買合約
+- 🔒 **API 保護**: 後台 API 端點受 API Key 保護
 
 ### 前台購物
 - 🛍️ **商品總覽**: 瀏覽所有可購買商品
@@ -106,6 +107,23 @@ vercel
 - `data/products.json`: 商品資料
 - `data/promotions.json`: 促銷活動資料
 - `data/orders.json`: 訂單資料
+
+## API 安全性
+
+後台管理 API 端點（POST、PUT、DELETE）受到 API Key 保護：
+- 所有修改資料的請求需要在 Header 中包含 `x-api-key`
+- 預設 API Key: `shopee-admin-2024`
+- 可透過環境變數 `ADMIN_API_KEY` 自訂 API Key
+- 前端使用 `NEXT_PUBLIC_ADMIN_API_KEY` 環境變數配置
+
+### 環境變數設定
+```bash
+# 後端 API Key 驗證（可選，預設為 shopee-admin-2024）
+ADMIN_API_KEY=your-secret-api-key
+
+# 前端 API Key（可選，預設為 shopee-admin-2024）
+NEXT_PUBLIC_ADMIN_API_KEY=your-secret-api-key
+```
 
 ## 部署說明
 

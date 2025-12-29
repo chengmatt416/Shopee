@@ -64,7 +64,16 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    promotions[index] = { ...promotions[index], ...body };
+    // Explicitly map only allowed fields to prevent property injection
+    const updatedPromotion: Promotion = {
+      id: promotions[index].id, // Keep existing ID
+      productId: body.productId ?? promotions[index].productId,
+      minQuantity: body.minQuantity ?? promotions[index].minQuantity,
+      discountedPrice: body.discountedPrice ?? promotions[index].discountedPrice,
+      description: body.description ?? promotions[index].description,
+    };
+    
+    promotions[index] = updatedPromotion;
     await fs.writeFile(dataPath, JSON.stringify(promotions, null, 2));
     
     return NextResponse.json(promotions[index]);
