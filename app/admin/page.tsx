@@ -1,9 +1,29 @@
+"use client";
+
 import Link from "next/link";
+import { useAdminAuth, logout } from "@/lib/useAdminAuth";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
+  useAdminAuth();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">後台管理系統</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">後台管理系統</h1>
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          登出
+        </button>
+      </div>
       
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Link

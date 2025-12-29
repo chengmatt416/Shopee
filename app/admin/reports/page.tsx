@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Order } from "@/types";
+import { useAdminAuth } from "@/lib/useAdminAuth";
 
 export default function ReportsAdminPage() {
+  useAdminAuth();
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {

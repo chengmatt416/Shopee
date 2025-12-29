@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { Promotion, Product } from "@/types";
 import { getAuthHeaders } from "@/lib/api-client";
+import { useAdminAuth } from "@/lib/useAdminAuth";
 
 export default function PromotionsAdminPage() {
+  useAdminAuth();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPromotion, setCurrentPromotion] = useState<Partial<Promotion>>({});
