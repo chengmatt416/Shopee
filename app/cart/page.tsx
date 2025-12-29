@@ -191,7 +191,9 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between text-xl font-bold border-t pt-2">
                   <span>總計</span>
-                  <span className="text-orange-600">${calculateTotal()}</span>
+                  <span className="text-orange-600">
+                    ${products.length > 0 ? calculateTotal() : '計算中...'}
+                  </span>
                 </div>
               </div>
 

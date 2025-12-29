@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
 import { getAuthHeaders } from "@/lib/api-client";
+import { useAdminAuth } from "@/lib/useAdminAuth";
 
 export default function ProductsAdminPage() {
+  useAdminAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
