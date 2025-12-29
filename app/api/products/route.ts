@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
 import { Product } from "@/types";
+import { validateAdminRequest, getUnauthorizedResponse } from "@/lib/auth";
 
 const dataPath = path.join(process.cwd(), "data", "products.json");
 
@@ -16,6 +17,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
   try {
     const body = await request.json();
     const data = await fs.readFile(dataPath, "utf-8");
@@ -43,6 +48,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
   try {
     const body = await request.json();
     const data = await fs.readFile(dataPath, "utf-8");
@@ -56,7 +65,17 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    products[index] = { ...products[index], ...body };
+    // Explicitly map only allowed fields to prevent property injection
+    const updatedProduct: Product = {
+      id: products[index].id, // Keep existing ID
+      name: body.name ?? products[index].name,
+      description: body.description ?? products[index].description,
+      price: body.price ?? products[index].price,
+      image: body.image ?? products[index].image,
+      stock: body.stock ?? products[index].stock,
+    };
+    
+    products[index] = updatedProduct;
     await fs.writeFile(dataPath, JSON.stringify(products, null, 2));
     
     return NextResponse.json(products[index]);
@@ -69,6 +88,10 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  if (!validateAdminRequest(request)) {
+    return getUnauthorizedResponse();
+  }
+  
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

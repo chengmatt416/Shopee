@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Promotion, Product } from "@/types";
+import { getAuthHeaders } from "@/lib/api-client";
 
 export default function PromotionsAdminPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [currentPromotion, setCurrentPromotion] = useState<Partial<Promotion>>({});
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     fetchPromotions();
@@ -28,21 +30,38 @@ export default function PromotionsAdminPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    await fetch("/api/promotions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(currentPromotion),
-    });
+    if (currentPromotion.id) {
+      await fetch("/api/promotions", {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(currentPromotion),
+      });
+    } else {
+      await fetch("/api/promotions", {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(currentPromotion),
+      });
+    }
     
     setCurrentPromotion({});
+    setIsEditing(false);
     fetchPromotions();
   };
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此促銷活動嗎？")) {
-      await fetch(`/api/promotions?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/promotions?id=${id}`, { 
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       fetchPromotions();
     }
+  };
+
+  const handleEdit = (promotion: Promotion) => {
+    setCurrentPromotion(promotion);
+    setIsEditing(true);
   };
 
   const getProductName = (productId: string) => {
@@ -55,7 +74,9 @@ export default function PromotionsAdminPage() {
       <h1 className="text-3xl font-bold mb-8">促銷活動管理</h1>
 
       <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-        <h2 className="text-2xl font-bold mb-4">新增促銷活動</h2>
+        <h2 className="text-2xl font-bold mb-4">
+          {isEditing ? "編輯促銷活動" : "新增促銷活動"}
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">選擇商品</label>
@@ -128,12 +149,26 @@ export default function PromotionsAdminPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-          >
-            新增促銷
-          </button>
+          <div className="flex gap-4">
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+            >
+              {isEditing ? "更新" : "新增促銷"}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+                onClick={() => {
+                  setCurrentPromotion({});
+                  setIsEditing(false);
+                }}
+              >
+                取消
+              </button>
+            )}
+          </div>
         </form>
       </div>
 
@@ -157,7 +192,13 @@ export default function PromotionsAdminPage() {
                   <td className="p-2">{promotion.minQuantity}</td>
                   <td className="p-2">${promotion.discountedPrice}</td>
                   <td className="p-2">{promotion.description}</td>
-                  <td className="p-2">
+                  <td className="p-2 space-x-2">
+                    <button
+                      className="text-blue-500 hover:underline"
+                      onClick={() => handleEdit(promotion)}
+                    >
+                      編輯
+                    </button>
                     <button
                       className="text-red-500 hover:underline"
                       onClick={() => handleDelete(promotion.id)}

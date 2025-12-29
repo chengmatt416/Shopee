@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Product } from "@/types";
+import { getAuthHeaders } from "@/lib/api-client";
 
 export default function ProductsAdminPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,13 +25,13 @@ export default function ProductsAdminPage() {
     if (currentProduct.id) {
       await fetch("/api/products", {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(currentProduct),
       });
     } else {
       await fetch("/api/products", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(currentProduct),
       });
     }
@@ -42,7 +43,10 @@ export default function ProductsAdminPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此商品嗎？")) {
-      await fetch(`/api/products?id=${id}`, { method: "DELETE" });
+      await fetch(`/api/products?id=${id}`, { 
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       fetchProducts();
     }
   };
