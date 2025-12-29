@@ -106,10 +106,14 @@ export default function CheckoutPage() {
     };
 
     try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(order),
+      const params = new URLSearchParams();
+      params.append("action", "create");
+      params.append("items", JSON.stringify(order.items));
+      params.append("totalAmount", order.totalAmount.toString());
+      params.append("signature", order.signature);
+      
+      const res = await fetch(`/api/orders?${params.toString()}`, {
+        method: "GET",
       });
 
       const createdOrder = await res.json();

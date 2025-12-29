@@ -32,19 +32,23 @@ export default function PromotionsAdminPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const params = new URLSearchParams();
     if (currentPromotion.id) {
-      await fetch("/api/promotions", {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(currentPromotion),
-      });
+      params.append("action", "update");
+      params.append("id", currentPromotion.id);
     } else {
-      await fetch("/api/promotions", {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(currentPromotion),
-      });
+      params.append("action", "create");
     }
+    params.append("productId", currentPromotion.productId || "");
+    params.append("minQuantity", (currentPromotion.minQuantity || 0).toString());
+    params.append("discountedPrice", (currentPromotion.discountedPrice || 0).toString());
+    params.append("description", currentPromotion.description || "");
+    
+    const headers = getAuthHeaders();
+    await fetch(`/api/promotions?${params.toString()}`, {
+      method: "GET",
+      headers,
+    });
     
     setCurrentPromotion({});
     setIsEditing(false);
@@ -53,9 +57,14 @@ export default function PromotionsAdminPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此促銷活動嗎？")) {
-      await fetch(`/api/promotions?id=${id}`, { 
-        method: "DELETE",
-        headers: getAuthHeaders(),
+      const params = new URLSearchParams();
+      params.append("action", "delete");
+      params.append("id", id);
+      
+      const headers = getAuthHeaders();
+      await fetch(`/api/promotions?${params.toString()}`, { 
+        method: "GET",
+        headers,
       });
       fetchPromotions();
     }

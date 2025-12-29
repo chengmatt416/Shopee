@@ -24,19 +24,26 @@ export default function ProductsAdminPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const params = new URLSearchParams();
     if (currentProduct.id) {
-      await fetch("/api/products", {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(currentProduct),
-      });
+      params.append("action", "update");
+      params.append("id", currentProduct.id);
     } else {
-      await fetch("/api/products", {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(currentProduct),
-      });
+      params.append("action", "create");
     }
+    params.append("name", currentProduct.name || "");
+    params.append("description", currentProduct.description || "");
+    params.append("price", (currentProduct.price || 0).toString());
+    params.append("stock", (currentProduct.stock || 0).toString());
+    if (currentProduct.image) {
+      params.append("image", currentProduct.image);
+    }
+    
+    const headers = getAuthHeaders();
+    await fetch(`/api/products?${params.toString()}`, {
+      method: "GET",
+      headers,
+    });
     
     setCurrentProduct({});
     setIsEditing(false);
@@ -45,9 +52,14 @@ export default function ProductsAdminPage() {
 
   const handleDelete = async (id: string) => {
     if (confirm("確定要刪除此商品嗎？")) {
-      await fetch(`/api/products?id=${id}`, { 
-        method: "DELETE",
-        headers: getAuthHeaders(),
+      const params = new URLSearchParams();
+      params.append("action", "delete");
+      params.append("id", id);
+      
+      const headers = getAuthHeaders();
+      await fetch(`/api/products?${params.toString()}`, { 
+        method: "GET",
+        headers,
       });
       fetchProducts();
     }
