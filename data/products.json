@@ -1,0 +1,34 @@
+[
+  {
+    "id": "1",
+    "name": "無線藍牙耳機",
+    "description": "高品質音質，超長續航，舒適佩戴。支援主動降噪功能。",
+    "price": 1299,
+    "image": "/images/placeholder.png",
+    "stock": 50
+  },
+  {
+    "id": "2",
+    "name": "智能手環",
+    "description": "健康監測，運動追蹤，睡眠分析。防水設計，支援多種運動模式。",
+    "price": 899,
+    "image": "/images/placeholder.png",
+    "stock": 100
+  },
+  {
+    "id": "3",
+    "name": "便攜充電寶",
+    "description": "20000mAh 大容量，支援快充，雙USB輸出。輕巧便攜，外出必備。",
+    "price": 599,
+    "image": "/images/placeholder.png",
+    "stock": 75
+  },
+  {
+    "id": "4",
+    "name": "無線滑鼠",
+    "description": "人體工學設計，靜音按鍵，高精度光學感應器。適用於辦公和遊戲。",
+    "price": 399,
+    "image": "/images/placeholder.png",
+    "stock": 120
+  }
+]
