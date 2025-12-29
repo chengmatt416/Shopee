@@ -85,6 +85,47 @@ vercel
 └── components/            # 可重用元件
 ```
 
+## 功能演示
+
+### 前台功能
+1. **首頁**: 顯示主要導航，包含商品總覽和後台管理入口
+2. **商品總覽**: 展示所有商品，包含促銷標示和庫存資訊
+3. **商品詳情**: 查看單一商品的詳細資訊和促銷說明
+4. **購物車**: 管理購買項目，支援數量調整和移除
+5. **結帳**: 使用電子簽名確認訂單
+6. **訂單確認**: 下載 PDF 收據和 TXT 合約
+
+### 後台功能
+1. **商品管理**: CRUD 操作，管理商品資訊
+2. **促銷活動**: 設定基於數量的批量折扣
+3. **銷售報表**: 查看所有訂單並下載 CSV 報表
+
+## 資料存儲
+
+本專案使用 JSON 檔案作為簡易資料庫：
+- `data/products.json`: 商品資料
+- `data/promotions.json`: 促銷活動資料
+- `data/orders.json`: 訂單資料
+
+## 部署說明
+
+### Vercel 部署
+1. 將專案推送到 GitHub
+2. 在 Vercel 導入專案
+3. Vercel 會自動偵測 Next.js 並部署
+
+### 環境需求
+- Node.js 18+ 
+- npm 或 yarn
+
+## 開發筆記
+
+- 使用 Next.js App Router (非 Pages Router)
+- TypeScript 確保類型安全
+- Tailwind CSS v4 提供現代化樣式
+- Client-side 狀態管理使用 localStorage
+- 簽名功能使用 signature_pad 函式庫
+
 ## License
 
 MIT
