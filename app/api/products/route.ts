@@ -38,13 +38,30 @@ export async function GET(request: NextRequest) {
       const image = searchParams.get("image");
       const stock = searchParams.get("stock");
       
+      const parsedPrice = price ? parseFloat(price) : 0;
+      const parsedStock = stock ? parseInt(stock) : 0;
+      
+      if (isNaN(parsedPrice)) {
+        return NextResponse.json(
+          { error: "Invalid price value" },
+          { status: 400 }
+        );
+      }
+      
+      if (isNaN(parsedStock)) {
+        return NextResponse.json(
+          { error: "Invalid stock value" },
+          { status: 400 }
+        );
+      }
+      
       const newProduct: Product = {
         id: Date.now().toString(),
         name: name || "",
         description: description || "",
-        price: price ? parseFloat(price) : 0,
+        price: parsedPrice,
         image: image || "/images/placeholder.png",
-        stock: stock ? parseInt(stock) : 0,
+        stock: parsedStock,
       };
       
       products.push(newProduct);
@@ -70,14 +87,36 @@ export async function GET(request: NextRequest) {
         );
       }
       
+      let parsedPrice = products[index].price;
+      if (price !== null) {
+        parsedPrice = parseFloat(price);
+        if (isNaN(parsedPrice)) {
+          return NextResponse.json(
+            { error: "Invalid price value" },
+            { status: 400 }
+          );
+        }
+      }
+      
+      let parsedStock = products[index].stock;
+      if (stock !== null) {
+        parsedStock = parseInt(stock);
+        if (isNaN(parsedStock)) {
+          return NextResponse.json(
+            { error: "Invalid stock value" },
+            { status: 400 }
+          );
+        }
+      }
+      
       // Explicitly map only allowed fields to prevent property injection
       const updatedProduct: Product = {
         id: products[index].id, // Keep existing ID
-        name: name || products[index].name,
-        description: description || products[index].description,
-        price: price ? parseFloat(price) : products[index].price,
-        image: image || products[index].image,
-        stock: stock ? parseInt(stock) : products[index].stock,
+        name: name ?? products[index].name,
+        description: description ?? products[index].description,
+        price: parsedPrice,
+        image: image ?? products[index].image,
+        stock: parsedStock,
       };
       
       products[index] = updatedProduct;

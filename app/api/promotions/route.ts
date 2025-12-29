@@ -37,11 +37,28 @@ export async function GET(request: NextRequest) {
       const discountedPrice = searchParams.get("discountedPrice");
       const description = searchParams.get("description");
       
+      const parsedMinQuantity = minQuantity ? parseInt(minQuantity) : 0;
+      const parsedDiscountedPrice = discountedPrice ? parseFloat(discountedPrice) : 0;
+      
+      if (isNaN(parsedMinQuantity)) {
+        return NextResponse.json(
+          { error: "Invalid minimum quantity value" },
+          { status: 400 }
+        );
+      }
+      
+      if (isNaN(parsedDiscountedPrice)) {
+        return NextResponse.json(
+          { error: "Invalid discounted price value" },
+          { status: 400 }
+        );
+      }
+      
       const newPromotion: Promotion = {
         id: Date.now().toString(),
         productId: productId || "",
-        minQuantity: minQuantity ? parseInt(minQuantity) : 0,
-        discountedPrice: discountedPrice ? parseFloat(discountedPrice) : 0,
+        minQuantity: parsedMinQuantity,
+        discountedPrice: parsedDiscountedPrice,
         description: description || "",
       };
       
@@ -67,13 +84,35 @@ export async function GET(request: NextRequest) {
         );
       }
       
+      let parsedMinQuantity = promotions[index].minQuantity;
+      if (minQuantity !== null) {
+        parsedMinQuantity = parseInt(minQuantity);
+        if (isNaN(parsedMinQuantity)) {
+          return NextResponse.json(
+            { error: "Invalid minimum quantity value" },
+            { status: 400 }
+          );
+        }
+      }
+      
+      let parsedDiscountedPrice = promotions[index].discountedPrice;
+      if (discountedPrice !== null) {
+        parsedDiscountedPrice = parseFloat(discountedPrice);
+        if (isNaN(parsedDiscountedPrice)) {
+          return NextResponse.json(
+            { error: "Invalid discounted price value" },
+            { status: 400 }
+          );
+        }
+      }
+      
       // Explicitly map only allowed fields to prevent property injection
       const updatedPromotion: Promotion = {
         id: promotions[index].id, // Keep existing ID
-        productId: productId || promotions[index].productId,
-        minQuantity: minQuantity ? parseInt(minQuantity) : promotions[index].minQuantity,
-        discountedPrice: discountedPrice ? parseFloat(discountedPrice) : promotions[index].discountedPrice,
-        description: description || promotions[index].description,
+        productId: productId ?? promotions[index].productId,
+        minQuantity: parsedMinQuantity,
+        discountedPrice: parsedDiscountedPrice,
+        description: description ?? promotions[index].description,
       };
       
       promotions[index] = updatedPromotion;

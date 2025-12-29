@@ -114,7 +114,6 @@ export default function CheckoutPage() {
       
       const res = await fetch(`/api/orders?${params.toString()}`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
       });
 
       const createdOrder = await res.json();

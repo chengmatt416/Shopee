@@ -30,10 +30,30 @@ export async function GET(request: NextRequest) {
       const data = await fs.readFile(dataPath, "utf-8");
       const orders: Order[] = JSON.parse(data);
       
+      let parsedItems = [];
+      if (items) {
+        try {
+          parsedItems = JSON.parse(items);
+        } catch (parseError) {
+          return NextResponse.json(
+            { error: "Invalid items format" },
+            { status: 400 }
+          );
+        }
+      }
+      
+      const parsedTotalAmount = totalAmount ? parseFloat(totalAmount) : 0;
+      if (isNaN(parsedTotalAmount)) {
+        return NextResponse.json(
+          { error: "Invalid total amount" },
+          { status: 400 }
+        );
+      }
+      
       const newOrder: Order = {
         id: Date.now().toString(),
-        items: items ? JSON.parse(items) : [],
-        totalAmount: totalAmount ? parseFloat(totalAmount) : 0,
+        items: parsedItems,
+        totalAmount: parsedTotalAmount,
         signature: signature || "",
         date: new Date().toISOString(),
       };
