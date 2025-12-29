@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "1",
+    "productId": "1",
+    "minQuantity": 2,
+    "discountedPrice": 1099,
+    "description": "買2件以上享優惠價 $1099/件"
+  },
+  {
+    "id": "2",
+    "productId": "3",
+    "minQuantity": 3,
+    "discountedPrice": 499,
+    "description": "買3件以上享優惠價 $499/件"
+  }
+]
